@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import logging
+import logging, whichcraft
 import datetime
 import json as sysjson
 import platform
@@ -20,6 +20,7 @@ from uiautodev.exceptions import RequestError
 from uiautodev.model import Node
 
 logger = logging.getLogger(__name__)
+
 
 def is_output_terminal() -> bool:
     """

@@ -11,7 +11,6 @@ requires-python = ">=3.9"
 
 # 项目依赖
 dependencies = [
-    "adbutils==0.16.2",
     "click>=8.1.7",
     "pygments>=2",
     "uiautomator2==2.16.17.dev42",
@@ -28,6 +27,7 @@ dependencies = [
     "setuptools==78.1.1",
     "rich",
     "python-multipart>=0.0.18",
+    "adbutils==0.16.2",
 ]
 
 [tool.uv.sources]

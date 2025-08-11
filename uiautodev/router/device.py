@@ -6,6 +6,8 @@
 
 import io
 import logging
+import time
+import json
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Query, Request, Response
@@ -44,13 +46,52 @@ def make_router(provider: BaseProvider) -> APIRouter:
         try:
             driver = provider.get_device_driver(serial)
             pil_img = driver.screenshot(id).convert("RGB")
+            
+            # 检查是否是空图片（截图失败时的备用方案）
+            if pil_img.size == (100, 100) and pil_img.getpixel((50, 50)) == (128, 128, 128):
+                # 这是最小的备用图片，说明截图失败了
+                logger.warning("Screenshot failed, returning fallback image")
+            
             buf = io.BytesIO()
             pil_img.save(buf, format="JPEG")
             image_bytes = buf.getvalue()
             return Response(content=image_bytes, media_type="image/jpeg")
+            
         except Exception as e:
             logger.exception("screenshot failed")
-            return Response(content=str(e), media_type="text/plain", status_code=500)
+            # 即使截图完全失败，也尝试返回一个基本的空图片
+            try:
+                from PIL import Image, ImageDraw
+                
+                # 创建一个基本的错误提示图片
+                error_img = Image.new("RGB", (400, 300), color=(64, 64, 64))
+                draw = ImageDraw.Draw(error_img)
+                
+                # 添加错误信息
+                try:
+                    from PIL import ImageFont
+                    font = ImageFont.truetype("arial.ttf", 20)
+                except:
+                    font = ImageFont.load_default()
+                
+                error_text = f"截图失败: {str(e)[:50]}"
+                draw.text((20, 20), error_text, fill=(255, 255, 255), font=font)
+                
+                # 转换为JPEG
+                buf = io.BytesIO()
+                error_img.save(buf, format="JPEG")
+                image_bytes = buf.getvalue()
+                
+                return Response(content=image_bytes, media_type="image/jpeg")
+                
+            except Exception as fallback_error:
+                logger.error(f"Even fallback image creation failed: {fallback_error}")
+                # 最后的备用方案：返回纯文本错误
+                return Response(
+                    content=f"截图失败: {str(e)}", 
+                    media_type="text/plain", 
+                    status_code=500
+                )
 
     @router.get("/{serial}/hierarchy")
     def dump_hierarchy(serial: str, format: str = "json") -> Node:

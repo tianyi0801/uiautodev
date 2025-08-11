@@ -47,11 +47,21 @@ class AndroidProvider(BaseProvider):
         adb = adbutils.AdbClient()
         ret: list[DeviceInfo] = []
         for d in adb.device_list():
-            if d.state != "device":
-                ret.append(DeviceInfo(serial=d.serial, status=d.state, enabled=False))
+            # 兼容旧版本adbutils，检查是否有state属性
+            device_state = getattr(d, 'state', 'device')  # 如果没有state属性，默认为'device'
+
+            if device_state != "device":
+                ret.append(DeviceInfo(serial=d.serial, status=device_state, enabled=False))
             else:
-                dev = adb.device(d.serial)
-                ret.append(DeviceInfo(serial=d.serial, model=dev.prop.model, name=dev.prop.name))
+                try:
+                    dev = adb.device(d.serial)
+                    # 尝试获取设备属性，如果失败则使用默认值
+                    model = getattr(dev.prop, 'model', 'unknown') if hasattr(dev, 'prop') else 'unknown'
+                    name = getattr(dev.prop, 'name', 'unknown') if hasattr(dev, 'prop') else 'unknown'
+                    ret.append(DeviceInfo(serial=d.serial, model=model, name=name))
+                except Exception as e:
+                    # 如果获取设备信息失败，仍然添加设备但使用默认信息
+                    ret.append(DeviceInfo(serial=d.serial, model='unknown', name='unknown'))
         return ret
 
     @lru_cache
