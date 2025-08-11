@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import datetime
 import json as sysjson
 import platform
@@ -18,6 +19,7 @@ from pygments import formatters, highlight, lexers
 from uiautodev.exceptions import RequestError
 from uiautodev.model import Node
 
+logger = logging.getLogger(__name__)
 
 def is_output_terminal() -> bool:
     """
@@ -168,3 +170,62 @@ def node_travel(node: Node, dfs: bool = True):
     if dfs:
         yield node
 
+
+def cmd_sync(a_cmd, a_show_out_put=True) -> str:
+    """
+    同步执行命令并返回输出结果
+
+    Args:
+        a_cmd (str): 要执行的命令
+        a_show_out_put (bool): 是否显示输出，默认为True
+
+    Returns:
+        str: 命令执行结果，失败返回None
+    """
+    try:
+        logger.info(f"cmd_sync:{a_cmd}")
+        i_process = subprocess.Popen(a_cmd, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     stdin=subprocess.PIPE, shell=True)
+        (i_output, i_err) = i_process.communicate()
+        if is_str_value_able(i_output):
+            i_output = i_output.decode('utf-8').strip()
+            if a_show_out_put:
+                logger.debug(f"cmd_sync output:{i_output}")
+            return i_output
+
+    except Exception as e:
+        logger.error(f"cmd_sync Exception:{e} cmd:{a_cmd}")
+
+    return None
+
+
+def is_str_value_able(a_str) -> bool:
+    """
+    检查字符串是否有效（非None且非空）
+
+    Args:
+        a_str: 要检查的字符串
+
+    Returns:
+        bool: True表示字符串有效，False表示无效
+    """
+    i_str = str(a_str)
+
+    if None is i_str:
+        return False
+
+    if "" == i_str:
+        return False
+
+    return True
+
+
+def adb_path():
+    """
+    获取adb命令的路径
+
+    Returns:
+        str: adb命令的完整路径
+    """
+    return whichcraft.which("adb")

@@ -46,7 +46,7 @@ class AndroidProvider(BaseProvider):
     def list_devices(self) -> list[DeviceInfo]:
         adb = adbutils.AdbClient()
         ret: list[DeviceInfo] = []
-        for d in adb.list():
+        for d in adb.device_list():
             if d.state != "device":
                 ret.append(DeviceInfo(serial=d.serial, status=d.state, enabled=False))
             else:

@@ -19,14 +19,51 @@ from uiautodev.command_types import CurrentAppResponse
 from uiautodev.driver.base_driver import BaseDriver
 from uiautodev.exceptions import AndroidDriverException, RequestError
 from uiautodev.model import AppInfo, Node, Rect, ShellResponse, WindowSize
-from uiautodev.utils.common import fetch_through_socket
+from uiautodev.utils.common import fetch_through_socket, adb_path, cmd_sync
 
 logger = logging.getLogger(__name__)
+
 
 class AndroidDriver(BaseDriver):
     def __init__(self, serial: str):
         super().__init__(serial)
         self.adb_device = adbutils.device(serial)
+        self.kill_utest_agent()
+
+    def kill_utest_agent(self) -> str:
+        """杀掉utest-agent进程"""
+        result = self.kill_process_by_name("utest-agent")
+        logger.info(f"杀掉utest-agent进程结果: {result}")
+        return result if result else "杀掉utest-agent进程完成"
+
+    def kill_process_by_name(self, process_name: str) -> str:
+        """使用cmd_sync方法杀掉指定名称的进程
+
+        Args:
+            process_name (str): 要杀掉的进程名称
+
+        Returns:
+            str: 执行结果
+        """
+        # 使用cmd_sync方法，和命令行执行结果一致
+        cmd = f'{adb_path()} -s {self.serial} shell "ps | grep {process_name} | awk \'{{print $2}}\' | xargs -r kill"'
+        result = cmd_sync(cmd)
+        logger.info(f"杀掉进程 {process_name} 结果: {result}")
+        return result if result else f"杀掉进程 {process_name} 完成"
+
+    def kill_process_by_pid(self, pid: str) -> str:
+        """使用cmd_sync方法杀掉指定PID的进程
+
+        Args:
+            pid (str): 进程ID
+
+        Returns:
+            str: 执行结果
+        """
+        cmd = f'{adb_path()} -s {self.serial} shell "kill {pid}"'
+        result = cmd_sync(cmd)
+        logger.info(f"杀掉进程 PID {pid} 结果: {result}")
+        return result if result else f"杀掉进程 PID {pid} 完成"
 
     @cached_property
     def ud(self) -> u2.Device:
@@ -40,7 +77,7 @@ class AndroidDriver(BaseDriver):
             return match.group(1)  # 返回包名/类名，例如 com.example/.MainActivity
         else:
             return ""
-    
+
     def screenshot(self, id: int) -> Image.Image:
         if id > 0:
             raise AndroidDriverException("multi-display is not supported yet for uiautomator2")
@@ -81,7 +118,7 @@ class AndroidDriver(BaseDriver):
             return self.ud.dump_hierarchy()
         except Exception as e:
             raise AndroidDriverException(f"Failed to dump hierarchy: {str(e)}")
-    
+
     def tap(self, x: int, y: int):
         self.adb_device.click(x, y)
 
@@ -102,28 +139,28 @@ class AndroidDriver(BaseDriver):
         if self.adb_device.package_info(package) is None:
             raise AndroidDriverException(f"App not installed: {package}")
         self.adb_device.app_start(package)
-    
+
     def app_terminate(self, package: str):
         self.adb_device.app_stop(package)
 
     def home(self):
         self.adb_device.keyevent("HOME")
-    
+
     def wake_up(self):
         self.adb_device.keyevent("WAKEUP")
-    
+
     def back(self):
         self.adb_device.keyevent("BACK")
-    
+
     def app_switch(self):
         self.adb_device.keyevent("APP_SWITCH")
-    
+
     def volume_up(self):
         self.adb_device.keyevent("VOLUME_UP")
-    
+
     def volume_down(self):
         self.adb_device.keyevent("VOLUME_DOWN")
-    
+
     def volume_mute(self):
         self.adb_device.keyevent("VOLUME_MUTE")
 
@@ -178,7 +215,6 @@ class AndroidDriver(BaseDriver):
         yield from self.adb_device.sync.iter_content(remote_path)
 
 
-
 def parse_xml(xml_data: str, wsize: WindowSize, display_id: Optional[int] = None) -> Node:
     root = ElementTree.fromstring(xml_data)
     node = parse_xml_element(root, wsize, display_id)
@@ -187,7 +223,8 @@ def parse_xml(xml_data: str, wsize: WindowSize, display_id: Optional[int] = None
     return node
 
 
-def parse_xml_element(element, wsize: WindowSize, display_id: Optional[int], indexes: List[int] = [0]) -> Optional[Node]:
+def parse_xml_element(element, wsize: WindowSize, display_id: Optional[int], indexes: List[int] = [0]) -> Optional[
+    Node]:
     """
     Recursively parse an XML element into a dictionary format.
     """
@@ -214,7 +251,7 @@ def parse_xml_element(element, wsize: WindowSize, display_id: Optional[int], ind
             bounds[3] / wsize.height,
         )
         bounds = map(partial(round, ndigits=4), bounds)
-        
+
     elem = Node(
         key="-".join(map(str, indexes)),
         name=name,
