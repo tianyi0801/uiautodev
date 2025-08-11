@@ -11,7 +11,7 @@ requires-python = ">=3.9"
 
 # 项目依赖
 dependencies = [
-    "adbutils>=0.11.0,<1.0",
+    "adbutils==0.16.2",
     "click>=8.1.7",
     "pygments>=2",
     "uiautomator2==2.16.17.dev42",
