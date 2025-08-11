@@ -1,5 +1,5 @@
 [project]
-name = "uiautodev"
+name = "uiautodev-utest"
 version = "0.9.1"
 description = "Mobile UI Automation, include UI hierarchy inspector, script recorder"
 authors = [
@@ -25,6 +25,7 @@ dependencies = [
     "uvicorn>=0.33.0",
     "whichcraft==0.6.1",
     "setuptools==78.1.1",
+    "packaging>=20.3,<21",
     "rich",
     "python-multipart>=0.0.18",
     "adbutils==0.16.2",
@@ -55,3 +56,7 @@ include = ["uiautodev*"]
 
 [tool.setuptools.package-data]
 uiautodev = ["binaries/*"]
+
+[index]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
