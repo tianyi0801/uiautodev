@@ -13,7 +13,6 @@ requires-python = ">=3.9"
 dependencies = [
     "click>=8.1.7",
     "pygments>=2",
-    "uiautomator2==2.16.17.dev42",
     "fastapi==0.115.12",
     "pydantic>=2.6",
     "wdapy>0.2.2,<1",
@@ -30,9 +29,6 @@ dependencies = [
     "python-multipart>=0.0.18",
     "adbutils==0.16.2",
 ]
-
-[tool.uv.sources]
-uiautomator2 = { path = "uiautodev/binaries/uiautomator2-2.16.17.dev42.tar.gz" }
 
 # 可选依赖（开发依赖）
 [project.optional-dependencies]
@@ -57,6 +53,6 @@ include = ["uiautodev*"]
 [tool.setuptools.package-data]
 uiautodev = ["binaries/*"]
 
-[index]
+[[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
