@@ -75,4 +75,4 @@ def _install_local_deps():
 
 
 # 首包导入时自动执行
-_install_local_deps()
+# _install_local_deps()

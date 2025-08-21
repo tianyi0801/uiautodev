@@ -3,9 +3,9 @@ name = "uiautodev-utest"
 version = "0.9.1"
 description = "Mobile UI Automation, include UI hierarchy inspector, script recorder"
 authors = [
-    {name = "codeskyblue", email = "codeskyblue@gmail.com"}
+    { name = "codeskyblue", email = "codeskyblue@gmail.com" }
 ]
-license = {text = "MIT"}
+license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.9"
 
@@ -17,17 +17,24 @@ dependencies = [
     "pydantic>=2.6",
     "wdapy>0.2.2,<1",
     "websockets>=10.4",
-    "Pillow",
+    "pillow",
     "construct",
     "lxml",
     "httpx",
     "uvicorn>=0.33.0",
     "whichcraft==0.6.1",
-    "setuptools==78.1.1",
+    "setuptools==64",
     "packaging>=20.3,<21",
     "rich",
     "python-multipart>=0.0.18",
     "adbutils==0.16.2",
+    "utest-uiautomator2==2.16.17.dev42",
+    "filelock",
+    "logzero",
+    "six",
+    "cached_property",
+    "progress",
+    "twine>=6.0.1",
 ]
 
 # 可选依赖（开发依赖）
@@ -56,3 +63,6 @@ uiautodev = ["binaries/*"]
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
+
+[[tool.uv.index]]
+url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
