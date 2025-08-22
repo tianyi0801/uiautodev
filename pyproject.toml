@@ -28,13 +28,14 @@ dependencies = [
     "rich",
     "python-multipart>=0.0.18",
     "adbutils==0.16.2",
-    "utest-uiautomator2==2.16.17.dev42",
+    "utest-uiautomator2==2.16.17.dev44",
     "filelock",
     "logzero",
     "six",
     "cached_property",
     "progress",
     "twine>=6.0.1",
+    "tidevice>=0.12.10",
 ]
 
 # 可选依赖（开发依赖）
